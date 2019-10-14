@@ -1,0 +1,29 @@
+* Storytell java backend developer
+  Java RESTful application with CRUD capabillities buildt on top of Quarkus
+  micro service framewrok.
+
+** Getting started
+   You need to install:
+
+   - JDK 1.8+ installed with JAVA_HOME configured appropriately
+
+   - Apache Maven 3.5.3+
+
+   - Optionally get GraalVM 19.2.0.1 for native image compilation 
+
+** Running
+  
+   #+BEGIN_SRC shell
+    ./mvnw compile quarkus:dev
+   #+END_SRC
+   
+   Navigate to localhost:8080
+  
+** Building native image
+   
+   Note: You need to change database from in memmory H2 to postgres or similiar
+   in order to run native image.
+   
+   #+BEGIN_SRC shell
+     ./mvnw package -Pnative
+   #+END_SRC
