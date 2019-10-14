@@ -1,4 +1,4 @@
-* Storytell java backend developer
+* Java backend developer
   Java RESTful application with CRUD capabillities buildt on top of Quarkus
   micro service framewrok.
 
