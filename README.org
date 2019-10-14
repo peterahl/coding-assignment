@@ -21,7 +21,7 @@
   
 ** Building native image
    
-   Note: You need to change database from in memmory H2 to postgres or similiar
+   Note: You need to change database from in memory H2 to postgres or similiar
    in order to run native image.
    
    #+BEGIN_SRC shell
