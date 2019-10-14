@@ -1,6 +1,6 @@
 * Java backend developer
   Java RESTful application with CRUD capabillities buildt on top of Quarkus
-  micro service framewrok.
+  microservice frame-work.
 
 ** Getting started
    You need to install:
