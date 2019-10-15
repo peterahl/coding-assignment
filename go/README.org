@@ -1,0 +1,25 @@
+* Setup
+  Install go
+  Clone repo outside of GOPATH
+  
+  Setup .env file
+  
+* Run
+  #+begin_src shell
+    go run cmd/server/*
+  #+end_src 
+  
+* Test
+  
+  #+begin_src shell
+    curl -X POST -H "Content-Type: application/json" -d '{"name":"New Todo"}' http://localhost:3000/messages
+
+    curl -X DELETE http://localhost:3000/messages/1
+
+    curl -X GET http://localhost:3000/messages/1 | jq .
+
+    curl -X GET http://localhost:3000/messages | jq .
+  #+end_src 
+  
+
+ 

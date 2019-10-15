@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Message REST service</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wingcss/0.1.8/wing.min.css"/>
+    <!-- Load AngularJS -->
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script type="text/javascript">
+      var app = angular.module("MesageManagement", []);
+
+      //Controller Part
+      app.controller("MessageManagementController", function ($scope, $http) {
+
+          //Initialize page with default data which is blank in this example
+          $scope.messages = [];
+
+          $scope.form = {
+              text: ""
+          };
+
+          $scope.formMessage = {
+              id: "",
+              text: ""
+          };
+
+          //Now load the data from server
+          _refreshPageData();
+
+          //HTTP POST methods for add messages
+          $scope.add = function () {
+              var data = { "text": $scope.form.text };
+
+              $http({
+                  method: "POST",
+                  url: '/messages',
+                  data: angular.toJson(data),
+                  headers: {
+                      'Content-Type': 'application/json'
+                  }
+              }).then(_success, _error);
+          };
+
+          $scope.update = function () {
+              var data = { "text": $scope.formMessage.text };
+
+              $http({
+                  method: "PUT",
+                  url: '/messages/' + $scope.formMessage.id ,
+                  data: angular.toJson(data),
+                  headers: {
+                      'Content-Type': 'application/json'
+                  }
+              }).then(_success, _error);
+          };
+
+          $scope.delete = function (id) {
+              var data = {
+                  "id": id,
+                  "text": $scope.form.text
+              };
+
+              $http({
+                  method: "DELETE",
+                  url: '/messages/' + id,
+                  data: angular.toJson(data),
+                  headers: {
+                      'Content-Type': 'application/json'
+                  }
+              }).then(_success, _error);
+          };
+
+          /* Private Methods */
+          //HTTP GET- get all messages collection
+          function _refreshPageData() {
+              $http({
+                  method: 'GET',
+                  url: '/messages'
+              }).then(function successCallback(response) {
+                  $scope.messages = response.data;
+              }, function errorCallback(response) {
+                  console.log(response.statusText);
+              });
+          }
+
+          function _success(response) {
+              _refreshPageData();
+              _clearForm();
+          }
+
+          function _error(response) {
+              alert(response.data.message || response.statusText);
+          }
+
+          //Clear the form
+          function _clearForm() {
+              $scope.form.text = "";
+              $scope.formMessage.text = "";
+              $scope.formMessage.id = "";
+          }
+      });
+    </script>
+</head>
+<body ng-app="MesageManagement" ng-controller="MessageManagementController">
+    <div class="container">
+        <h3>Add a message</h3>
+        <form ng-submit="add()">
+            <div class="row">
+                <div class="col-6"><input type="text" placeholder="Text" ng-model="form.text" size="60"/></div>
+            </div>
+            <input type="submit" value="Save"/>
+        </form>
+        <h3>Edit a message</h3>
+        <form ng-submit="update()">
+            <div class="row">
+                <div class="col-1"><input type="text" placeholder="Id" ng-model="formMessage.id" size="60"/></div>
+                <div class="col-6"><input type="text" placeholder="New message" ng-model="formMessage.text" size="60"/></div>
+            </div>
+            <input type="submit" value="Update"/>
+        </form>
+        <h3>Message List</h3>
+        <div class="row">
+            <div class="col-2">ID</div>
+            <div class="col-10">Message</div>
+        </div>
+        <div class="row" ng-repeat="message in messages">
+            <div class="col-2">{{ message.id }}</div>
+            <div class="col-8">{{ message.text }}</div>
+            <div class="col-2">
+                <td>
+                    <button ng-click="delete(message.id)">delete</button>
+                </td>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
