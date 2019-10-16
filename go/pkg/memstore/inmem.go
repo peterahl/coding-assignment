@@ -1,11 +1,12 @@
 package memstore
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 	"sync"
 	"sync/atomic"
+
+	"github.com/peterahl/storytel/go/pkg/models"
 )
 
 var (
@@ -13,25 +14,20 @@ var (
 )
 
 // IdSorter sorts planets by name.
-type IdSorter []Message
+type IdSorter []models.Message
 
 func (id IdSorter) Len() int           { return len(id) }
 func (id IdSorter) Swap(i, j int)      { id[i], id[j] = id[j], id[i] }
 func (id IdSorter) Less(i, j int) bool { return id[i].Id < id[j].Id }
 
-type Message struct {
-	Id   uint64 `json:"id,omitempty" form:"id" binding:"required"`
-	Text string `json:"text" form:"message" binding:"required"`
-}
-
 type Store struct {
-	Messages map[uint64]Message `json:"id" form:"id" binding:"required"`
+	Messages map[uint64]models.Message `json:"id" form:"id" binding:"required"`
 	sync.RWMutex
 }
 
-func (s *Store) GetMessages() (error, []Message) {
+func (s *Store) GetMessages() (error, []models.Message) {
 	s.RLock()
-	data := make([]Message, 0, len(s.Messages))
+	data := make([]models.Message, 0, len(s.Messages))
 	for _, value := range s.Messages {
 		data = append(data, value)
 	}
@@ -40,34 +36,25 @@ func (s *Store) GetMessages() (error, []Message) {
 	return nil, data
 }
 
-func (s *Store) GetMessage(id uint64) (error, Message) {
+func (s *Store) GetMessage(id uint64) (error, models.Message) {
 	s.RLock()
 	if val, ok := s.Messages[id]; ok {
 		s.RUnlock()
 		return nil, val
 	} else {
 		s.RUnlock()
-		return fmt.Errorf("There is no message for id: %d", id), Message{}
+		return fmt.Errorf("There is no message for id: %d", id), models.Message{}
 	}
 }
 
-func (s *Store) UpdateMessage(id uint64, message string) error {
-	var msg Message
-	if err := json.Unmarshal([]byte(message), &msg); err != nil {
-		return err
-	}
-	msg.Id = id
+func (s *Store) UpdateMessage(msg models.Message) error {
 	s.Lock()
-	s.Messages[id] = msg
+	s.Messages[msg.GetId()] = msg
 	s.Unlock()
 	return nil
 }
 
-func (s *Store) NewMessage(message string) error {
-	var msg Message
-	if err := json.Unmarshal([]byte(message), &msg); err != nil {
-		return err
-	}
+func (s *Store) NewMessage(msg models.Message) error {
 	id := atomic.AddUint64(&atomic_id, 1)
 	msg.Id = id
 	s.Lock()
@@ -76,9 +63,9 @@ func (s *Store) NewMessage(message string) error {
 	return nil
 }
 
-func (s *Store) DeleteMessage(id uint64) error {
+func (s *Store) DeleteMessage(msg models.Message) error {
 	s.Lock()
-	delete(s.Messages, id)
+	delete(s.Messages, msg.Id)
 	s.Unlock()
 	return nil
 }

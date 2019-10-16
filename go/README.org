@@ -23,3 +23,12 @@
   
 
  
+* Protobuf
+  
+  Not needed
+
+  Install https://github.com/golang/protobuf and protoc
+
+  #+begin_src shell
+    protoc --go_out=. *.proto
+  #+end_src 

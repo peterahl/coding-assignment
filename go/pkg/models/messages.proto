@@ -1,0 +1,9 @@
+syntax = "proto3";
+package models;
+
+// CreateStreamRequest is sent to create a new stream.
+message Message {
+	  string cmd  = 1; // Stream NATS subject
+	  uint64 id   = 2; // Stream NATS subject
+	  string text = 3; // Stream NATS subject
+}
