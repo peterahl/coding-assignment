@@ -1,34 +1,45 @@
-* Setup
-  Install go
-  Clone repo outside of GOPATH
+* Description
+  Eventsourced solution with a focus on CQRS
   
-  Setup .env file
+** Setup
+   Install:
+   - go
+   - nats.io
+   - liftbridge.io
+
+   Clone repo outside of GOPATH
   
-* Run
-  #+begin_src shell
-    go run cmd/server/*
-  #+end_src 
+** Run
   
-* Test
+   Start nats
+   #+begin_src shell
+     nats
+   #+end_src 
   
-  #+begin_src shell
-    curl -X POST -H "Content-Type: application/json" -d '{"name":"New Todo"}' http://localhost:3000/messages
-
-    curl -X DELETE http://localhost:3000/messages/1
-
-    curl -X GET http://localhost:3000/messages/1 | jq .
-
-    curl -X GET http://localhost:3000/messages | jq .
-  #+end_src 
+   Start liftbridge
+   #+begin_src shell
+     liftbridge --raft-bootstrap-seed
+   #+end_src 
   
-
- 
-* Protobuf
+   Run the server
+   #+begin_src shell
+     go run cmd/server/*
+   #+end_src 
+   
   
-  Not needed
+** Test
+   
+   For a UI, navigate to localhost:3000
+  
+   For testing in Terminal
+   #+begin_src shell
+     curl -X POST -H "Content-Type: application/json" -d '{"text":"first message"}' http://localhost:3000/messages
 
-  Install https://github.com/golang/protobuf and protoc
+     curl -X POST -H "Content-Type: application/json" -d '{"text":"Next message"}' http://localhost:3000/messages
 
-  #+begin_src shell
-    protoc --go_out=. *.proto
-  #+end_src 
+     curl -X GET http://localhost:3000/messages | jq .
+
+     curl -X GET http://localhost:3000/messages/1 | jq .
+
+     curl -X DELETE http://localhost:3000/messages/1
+   #+end_src 
