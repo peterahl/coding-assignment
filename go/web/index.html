@@ -54,15 +54,15 @@
               }).then(_success, _error);
           };
 
-          $scope.delete = function (id) {
+          $scope.delete = function (message) {
               var data = {
-                  "id": id,
-                  "text": $scope.form.text
+                  "id": message.id,
+                  "text": message.text
               };
 
               $http({
                   method: "DELETE",
-                  url: '/messages/' + id,
+                  url: '/messages/' + message.id,
                   data: angular.toJson(data),
                   headers: {
                       'Content-Type': 'application/json'
@@ -128,7 +128,7 @@
             <div class="col-8">{{ message.text }}</div>
             <div class="col-2">
                 <td>
-                    <button ng-click="delete(message.id)">delete</button>
+                    <button ng-click="delete(message)">delete</button>
                 </td>
             </div>
         </div>

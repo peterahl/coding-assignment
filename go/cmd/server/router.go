@@ -11,7 +11,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/mux"
 	lift "github.com/liftbridge-io/go-liftbridge"
-	"github.com/peterahl/storytel/go/pkg/models"
+	"github.com/peterahl/coding-assignment/go/pkg/models"
 )
 
 func newRouter(ds dataStore, client lift.Client) *mux.Router {
@@ -19,6 +19,7 @@ func newRouter(ds dataStore, client lift.Client) *mux.Router {
 	r := mux.NewRouter()
 
 	r.Handle("/messages", getMessages(ds)).Methods("GET")
+	r.Handle("/list", getCmds(ds)).Methods("GET")
 	r.Handle("/messages", newMessage(client)).Methods("POST")
 	r.Handle("/messages/{id:[0-9]+}", updateMessage(client)).Methods("PUT")
 	r.Handle("/messages/{id:[0-9]+}", getMessage(ds)).Methods("GET")
@@ -30,16 +31,31 @@ func newRouter(ds dataStore, client lift.Client) *mux.Router {
 
 }
 
-func getMessages(db dataStore) http.Handler {
+func getCmds(db dataStore) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		err, msg := db.GetMessages()
-		log.Println(msg)
+		err, msgs := db.GetCmds()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
 			w.WriteHeader(http.StatusOK)
-			if err = json.NewEncoder(w).Encode(msg); err != nil {
+			if err = json.NewEncoder(w).Encode(msgs); err != nil {
+				panic(err)
+			}
+		}
+	})
+
+}
+
+func getMessages(db dataStore) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		err, msgs := db.GetMessages()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		} else {
+			w.WriteHeader(http.StatusOK)
+			if err = json.NewEncoder(w).Encode(msgs); err != nil {
 				panic(err)
 			}
 		}
@@ -112,15 +128,15 @@ func updateMessage(client lift.Client) http.Handler {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		var msg *models.Message
-		if err := json.Unmarshal([]byte(body), msg); err != nil {
+		var msg models.Message
+		if err := json.Unmarshal([]byte(body), &msg); err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		msg.Id = id
 		msg.Cmd = "update"
-		data, err := proto.Marshal(msg)
+		data, err := proto.Marshal(&msg)
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -173,6 +189,7 @@ func deletMessage(client lift.Client) http.Handler {
 			w.Write([]byte(err.Error()))
 			return
 		}
+
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 		w.Write(body)

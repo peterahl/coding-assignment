@@ -1,4 +1,4 @@
-module github.com/peterahl/storytel/go
+module github.com/peterahl/coding-assignment/go
 
 go 1.12
 

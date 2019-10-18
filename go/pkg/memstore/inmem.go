@@ -6,7 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/peterahl/storytel/go/pkg/models"
+	"github.com/peterahl/coding-assignment/go/pkg/models"
 )
 
 var (
@@ -22,7 +22,16 @@ func (id IdSorter) Less(i, j int) bool { return id[i].Id < id[j].Id }
 
 type Store struct {
 	Messages map[uint64]models.Message `json:"id" form:"id" binding:"required"`
+	Cmds     []models.Message          `json:"list" form:"id" binding:"required"`
 	sync.RWMutex
+}
+
+func (s *Store) GetCmds() (error, []models.Message) {
+	s.RLock()
+	data := make([]models.Message, 0, len(s.Cmds))
+	data = s.Cmds
+	s.RUnlock()
+	return nil, data
 }
 
 func (s *Store) GetMessages() (error, []models.Message) {
@@ -48,10 +57,17 @@ func (s *Store) GetMessage(id uint64) (error, models.Message) {
 }
 
 func (s *Store) UpdateMessage(msg models.Message) error {
+	id := msg.GetId()
 	s.Lock()
-	s.Messages[msg.GetId()] = msg
+	for key, _ := range s.Messages {
+		if key == id {
+			s.Messages[id] = msg
+			s.Unlock()
+			return nil
+		}
+	}
 	s.Unlock()
-	return nil
+	return fmt.Errorf("Msg does not exist")
 }
 
 func (s *Store) NewMessage(msg models.Message) error {
@@ -59,6 +75,13 @@ func (s *Store) NewMessage(msg models.Message) error {
 	msg.Id = id
 	s.Lock()
 	s.Messages[id] = msg
+	s.Unlock()
+	return nil
+}
+
+func (s *Store) AddCommand(msg models.Message) error {
+	s.Lock()
+	s.Cmds = append(s.Cmds, msg)
 	s.Unlock()
 	return nil
 }
